@@ -1,0 +1,6 @@
+name: Web API
+type: module
+description: 'JSON:API with authentication, authorization and OpenAPI documentation, for easy ingestion of content by other applications.'
+package: Webship
+configure: webapi.settings
+core_version_requirement: ^11.4 || ^12

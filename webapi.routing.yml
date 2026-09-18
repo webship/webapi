@@ -1,0 +1,7 @@
+webapi.settings:
+  path: '/admin/config/services/webapi'
+  defaults:
+    _form: '\Drupal\webapi\Form\WebapiSettingsForm'
+    _title: 'Web API'
+  requirements:
+    _permission: 'administer webapi settings'

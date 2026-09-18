@@ -1,0 +1,5 @@
+webapi.settings:
+  title: 'Web API'
+  description: 'Configure the exposed entity types and the API links.'
+  route_name: webapi.settings
+  parent: system.admin_config_services

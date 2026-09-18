@@ -1,0 +1,35 @@
+{
+  "name": "drupal/webapi",
+  "description": "JSON:API with authentication, authorization and OpenAPI documentation, for easy ingestion of content by other applications.",
+  "type": "drupal-module",
+  "homepage": "https://www.drupal.org/project/webapi",
+  "license": "GPL-2.0-or-later",
+  "authors": [
+    {
+      "name": "Webship",
+      "homepage": "https://webship.co",
+      "role": "Maintainer"
+    }
+  ],
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/webapi",
+    "source": "http://cgit.drupalcode.org/webapi"
+  },
+  "repositories": {
+    "drupal": {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    }
+  },
+  "require": {
+    "drupal/core": "^11.4 || ^12",
+    "drupal/consumers": "^1",
+    "drupal/jsonapi_extras": "^3",
+    "drupal/openapi": "^2",
+    "drupal/openapi_jsonapi": "^3",
+    "drupal/openapi_rest": "^2",
+    "drupal/openapi_ui_swagger": "^1",
+    "drupal/restui": "^1",
+    "drupal/simple_oauth": "^6"
+  }
+}

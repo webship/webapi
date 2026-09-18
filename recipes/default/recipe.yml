@@ -1,0 +1,41 @@
+name: 'Web API - Default'
+description: 'A recipe to manage default installed modules, configs and permissions.'
+type: install
+install:
+  - basic_auth
+  - consumers
+  - jsonapi
+  - jsonapi_extras
+  - openapi
+  - openapi_jsonapi
+  - openapi_rest
+  - openapi_ui_swagger
+  - restui
+  - serialization
+  - simple_oauth
+  # Web API itself, so its own hooks run on a site template.
+  - webapi
+config:
+  import:
+    consumers: '*'
+    jsonapi: '*'
+    jsonapi_extras: '*'
+    openapi: '*'
+    openapi_jsonapi: '*'
+    openapi_rest: '*'
+    openapi_ui_swagger: '*'
+    restui: '*'
+    simple_oauth: '*'
+  actions:
+    # Keep JSON:API read-only. Turning on write operations is a decision for
+    # the site owner, and read-only mode is what the Drupal Security Team
+    # recommends as the safe default.
+    jsonapi.settings:
+      simpleConfigUpdate:
+        read_only: true
+    jsonapi_extras.settings:
+      simpleConfigUpdate:
+        # Serve the API from /api instead of /jsonapi.
+        path_prefix: api
+        include_count: true
+        validate_configuration_integrity: true

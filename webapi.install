@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Web API module.
+ */
+
+use Drupal\Core\Language\LanguageInterface;
+use Drupal\Core\Recipe\Recipe;
+use Drupal\Core\Recipe\RecipeRunner;
+
+/**
+ * Implements hook_install().
+ */
+function webapi_install($is_syncing) {
+  // Configuration imports bring their own configuration, and a recipe installs
+  // its modules with the config installer in syncing mode.
+  if ($is_syncing || \Drupal::isConfigSyncing()) {
+    return;
+  }
+
+  $recipe = Recipe::createFromDirectory(__DIR__ . '/recipes/default');
+  RecipeRunner::processRecipe($recipe);
+
+  webapi_add_api_docs_path_alias();
+}
+
+/**
+ * Gives the OpenAPI documentation a readable path.
+ */
+function webapi_add_api_docs_path_alias() {
+  if (!\Drupal::moduleHandler()->moduleExists('openapi_ui_swagger')) {
+    return;
+  }
+
+  $path = '/admin/config/services/openapi/swagger/jsonapi';
+  $storage = \Drupal::entityTypeManager()->getStorage('path_alias');
+  $existing = $storage->loadByProperties(['alias' => '/api-docs']);
+  if (!empty($existing)) {
+    return;
+  }
+
+  $storage->create([
+    'path' => $path,
+    'alias' => '/api-docs',
+    'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
+  ])->save();
+}

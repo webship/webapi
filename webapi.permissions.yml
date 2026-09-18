@@ -1,0 +1,10 @@
+administer webapi settings:
+  title: 'Administer Web API settings'
+  description: 'Configure which entity types are exposed and which API links are shown.'
+  restrict access: true
+access view json entity operation:
+  title: 'Use the View JSON entity operation'
+  description: 'See the JSON:API link in the operations of content and other entities.'
+access view api docs entity operation:
+  title: 'Use the View API documentation entity operation'
+  description: 'See the OpenAPI documentation link in the operations of bundle entities.'
