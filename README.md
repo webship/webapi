@@ -13,6 +13,9 @@ ingestion of content by other applications.
 - HTTP Basic authentication, and OAuth 2.0 with Simple OAuth and consumers.
 - OpenAPI documents for JSON:API and REST, rendered with Swagger UI at
   `/api-docs`.
+  Swagger UI needs the `swagger-api/swagger-ui` library in
+  `web/libraries/swagger-ui`; the Website and Webships project templates
+  install it there.
 - REST UI, to manage the core REST resources.
 
 ## Settings

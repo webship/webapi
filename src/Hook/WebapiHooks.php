@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\webapi\Hook;
 
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -33,9 +34,10 @@ class WebapiHooks {
    * Implements hook_entity_operation().
    */
   #[Hook('entity_operation')]
-  public function entityOperation(EntityInterface $entity): array {
+  public function entityOperation(EntityInterface $entity, CacheableMetadata $cacheability): array {
     $operations = [];
     $config = $this->configFactory->get('webapi.settings');
+    $cacheability->addCacheableDependency($config)->addCacheContexts(['user.permissions']);
 
     if ($config->get('entity_json')
       && $this->moduleHandler->moduleExists('jsonapi')

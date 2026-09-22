@@ -30,6 +30,7 @@
     "drupal/openapi_rest": "^2",
     "drupal/openapi_ui_swagger": "^1",
     "drupal/restui": "^1",
-    "drupal/simple_oauth": "^6"
+    "drupal/simple_oauth": "^6",
+    "swagger-api/swagger-ui": "^5"
   }
 }

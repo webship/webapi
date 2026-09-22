@@ -16,10 +16,8 @@ class WebapiSettingsForm extends ConfigFormBase {
 
   /**
    * The entity type manager.
-   *
-   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityTypeManager;
+  protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
    * {@inheritdoc}
