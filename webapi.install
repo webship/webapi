@@ -15,14 +15,15 @@ use Drupal\Core\Recipe\RecipeRunner;
  */
 function webapi_install($is_syncing) {
   // Configuration imports bring their own configuration, and a recipe installs
-  // its modules with the config installer in syncing mode.
-  if ($is_syncing || \Drupal::isConfigSyncing()) {
-    return;
+  // its modules with the config installer in syncing mode: only a module that
+  // is installed on its own applies the default recipe.
+  if (!$is_syncing && !\Drupal::isConfigSyncing()) {
+    $recipe = Recipe::createFromDirectory(__DIR__ . '/recipes/default');
+    RecipeRunner::processRecipe($recipe);
   }
 
-  $recipe = Recipe::createFromDirectory(__DIR__ . '/recipes/default');
-  RecipeRunner::processRecipe($recipe);
-
+  // A path alias is content, not configuration: neither a configuration import
+  // nor a recipe creates it, so it is added in every install mode.
   webapi_add_api_docs_path_alias();
   webapi_generate_oauth_keys();
 }
@@ -79,10 +80,9 @@ function webapi_generate_oauth_keys(): bool {
  * Gives the OpenAPI documentation a readable path.
  */
 function webapi_add_api_docs_path_alias() {
-  if (!\Drupal::moduleHandler()->moduleExists('openapi_ui_swagger')) {
-    return;
-  }
-
+  // No check for openapi_ui_swagger: modules of a recipe install in dependency
+  // order, so Swagger UI may not be installed yet. The alias answers as soon as
+  // it is.
   $path = '/admin/config/services/openapi/swagger/jsonapi';
   $storage = \Drupal::entityTypeManager()->getStorage('path_alias');
   $existing = $storage->loadByProperties(['alias' => '/api-docs']);
@@ -102,4 +102,11 @@ function webapi_add_api_docs_path_alias() {
  */
 function webapi_update_11001(): void {
   webapi_generate_oauth_keys();
+}
+
+/**
+ * Adds the /api-docs path alias that recipe installs never created.
+ */
+function webapi_update_11002(): void {
+  webapi_add_api_docs_path_alias();
 }
