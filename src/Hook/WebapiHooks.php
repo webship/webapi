@@ -52,6 +52,9 @@ class WebapiHooks {
           'title' => $this->t('View JSON'),
           'url' => $url,
           'weight' => 90,
+          // The operations builder of a view adds a destination, which
+          // JSON:API refuses; linkAlter() removes it again.
+          'webapi_no_destination' => TRUE,
         ];
       }
     }
@@ -107,6 +110,21 @@ class WebapiHooks {
         'severity' => RequirementSeverity::OK,
       ],
     ];
+  }
+
+  /**
+   * Implements hook_link_alter().
+   *
+   * JSON:API answers 400 to any query parameter it does not know, and the
+   * operations builder adds "destination" to every operation link. A link that
+   * sets the webapi_no_destination option goes without it.
+   */
+  #[Hook('link_alter')]
+  public function linkAlter(array &$variables): void {
+    if (empty($variables['options']['webapi_no_destination'])) {
+      return;
+    }
+    unset($variables['options']['query']['destination'], $variables['options']['webapi_no_destination']);
   }
 
   /**
