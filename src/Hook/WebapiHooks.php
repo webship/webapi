@@ -8,6 +8,8 @@ use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -28,6 +30,8 @@ class WebapiHooks {
     protected ModuleHandlerInterface $moduleHandler,
     #[Autowire(service: 'current_user')]
     protected AccountProxyInterface $currentUser,
+    #[Autowire(service: 'file_system')]
+    protected FileSystemInterface $fileSystem,
   ) {}
 
   /**
@@ -66,6 +70,43 @@ class WebapiHooks {
     }
 
     return $operations;
+  }
+
+  /**
+   * Implements hook_runtime_requirements().
+   *
+   * Simple OAuth does not report missing keys, and /oauth/token then answers
+   * 500 "You need to set the OAuth2 private key."
+   */
+  #[Hook('runtime_requirements')]
+  public function runtimeRequirements(): array {
+    if (!$this->moduleHandler->moduleExists('simple_oauth')) {
+      return [];
+    }
+    $config = $this->configFactory->get('simple_oauth.settings');
+    foreach (['private_key', 'public_key'] as $name) {
+      $path = $config->get($name);
+      if ($path && is_readable($this->fileSystem->realpath($path) ?: $path)) {
+        continue;
+      }
+      return [
+        'webapi_oauth_keys' => [
+          'title' => $this->t('OAuth 2.0 keys'),
+          'value' => $this->t('Not available'),
+          'description' => $this->t('Simple OAuth cannot issue tokens without a readable key pair. Set a private file path in settings.php and run <code>drush simple-oauth:generate-keys private://simple_oauth</code>, then set the key paths at <a href=":url">the Simple OAuth settings</a>.', [
+            ':url' => Url::fromRoute('oauth2_token.settings')->toString(),
+          ]),
+          'severity' => RequirementSeverity::Warning,
+        ],
+      ];
+    }
+    return [
+      'webapi_oauth_keys' => [
+        'title' => $this->t('OAuth 2.0 keys'),
+        'value' => $this->t('Configured'),
+        'severity' => RequirementSeverity::OK,
+      ],
+    ];
   }
 
   /**

@@ -5,6 +5,7 @@
  * Install, update and uninstall functions for the Web API module.
  */
 
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Recipe\Recipe;
 use Drupal\Core\Recipe\RecipeRunner;
@@ -23,6 +24,55 @@ function webapi_install($is_syncing) {
   RecipeRunner::processRecipe($recipe);
 
   webapi_add_api_docs_path_alias();
+  webapi_generate_oauth_keys();
+}
+
+/**
+ * Generates the OAuth 2.0 key pair in the private files directory.
+ *
+ * Simple OAuth cannot sign a token without a private key: /oauth/token answers
+ * 500 and the JWKS is empty. The keys go outside the web root, and
+ * simple_oauth.settings keeps their private:// paths, which hold on every
+ * environment. Keys that are already configured are left alone, and nothing is
+ * generated while the site has no private files directory.
+ *
+ * @return bool
+ *   TRUE when a key pair was generated.
+ */
+function webapi_generate_oauth_keys(): bool {
+  if (!\Drupal::moduleHandler()->moduleExists('simple_oauth') || !extension_loaded('openssl')) {
+    return FALSE;
+  }
+  $config = \Drupal::configFactory()->getEditable('simple_oauth.settings');
+  if ($config->get('private_key') || $config->get('public_key')) {
+    return FALSE;
+  }
+  if (!\Drupal::service('stream_wrapper_manager')->isValidScheme('private')) {
+    return FALSE;
+  }
+
+  $file_system = \Drupal::service('file_system');
+  $private = $file_system->realpath('private://');
+  if (!$private || !is_dir($private) || !is_writable($private)) {
+    return FALSE;
+  }
+
+  $directory = 'private://simple_oauth';
+  if (!$file_system->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY | FileSystemInterface::MODIFY_PERMISSIONS)) {
+    return FALSE;
+  }
+  try {
+    \Drupal::service('simple_oauth.key.generator')->generateKeys($file_system->realpath($directory));
+  }
+  catch (\Exception $exception) {
+    \Drupal::logger('webapi')->error('The OAuth 2.0 keys were not generated: @message', ['@message' => $exception->getMessage()]);
+    return FALSE;
+  }
+  $config
+    ->set('private_key', $directory . '/private.key')
+    ->set('public_key', $directory . '/public.key')
+    ->save();
+  return TRUE;
 }
 
 /**
@@ -45,4 +95,11 @@ function webapi_add_api_docs_path_alias() {
     'alias' => '/api-docs',
     'langcode' => LanguageInterface::LANGCODE_NOT_SPECIFIED,
   ])->save();
+}
+
+/**
+ * Generates the OAuth 2.0 keys that earlier installs never had.
+ */
+function webapi_update_11001(): void {
+  webapi_generate_oauth_keys();
 }

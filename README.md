@@ -18,6 +18,16 @@ ingestion of content by other applications.
   install it there.
 - REST UI, to manage the core REST resources.
 
+## OAuth 2.0 keys
+
+Simple OAuth cannot issue a token without a key pair. When the module is
+installed or updated and the site has a private files directory, it generates
+the keys in `private://simple_oauth` and saves their paths, unless keys are
+already configured. Without a private files directory, set `file_private_path`
+in `settings.php` and run `drush simple-oauth:generate-keys private://simple_oauth`;
+the status report says "OAuth 2.0 keys: Not available" until a readable key pair
+is configured.
+
 ## Settings
 
 `/admin/config/services/webapi` decides whether the **View JSON** and **View
