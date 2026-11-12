@@ -59,7 +59,10 @@ class WebapiHooks {
       }
     }
 
+    // The setting is about bundle entities, such as content types and
+    // vocabularies, the entity types that are the bundles of another one.
     if ($config->get('bundle_docs')
+      && $entity->getEntityType()->getBundleOf()
       && $this->moduleHandler->moduleExists('openapi_ui_swagger')
       && $this->currentUser->hasPermission('access view api docs entity operation')) {
       $operations['webapi_view_api_docs'] = [
