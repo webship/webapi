@@ -1,0 +1,18 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - openapi
+    - system
+    - webapi
+id: api_admin
+label: 'API administrator'
+weight: 4
+is_admin: false
+permissions:
+  - 'access administration pages'
+  - 'access openapi api docs'
+  - 'access view api docs entity operation'
+  - 'access view json entity operation'
+  - 'administer webapi settings'
+  - 'view the administration theme'

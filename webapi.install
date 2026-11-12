@@ -5,6 +5,7 @@
  * Install, update and uninstall functions for the Web API module.
  */
 
+use Drupal\Component\Serialization\Yaml;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Language\LanguageInterface;
 use Drupal\Core\Recipe\Recipe;
@@ -26,6 +27,30 @@ function webapi_install($is_syncing) {
   // nor a recipe creates it, so it is added in every install mode.
   webapi_add_api_docs_path_alias();
   webapi_generate_oauth_keys();
+  webapi_add_api_admin_role();
+}
+
+/**
+ * Adds the API administrator role shipped in config/optional.
+ *
+ * A recipe installs its modules in syncing mode, which skips the configuration
+ * entities of the module, so the role is created here from the shipped file.
+ * A role the site already has is kept, and nothing is created while a module
+ * that provides one of its permissions is not installed.
+ */
+function webapi_add_api_admin_role(): void {
+  $storage = \Drupal::entityTypeManager()->getStorage('user_role');
+  if ($storage->load('api_admin')) {
+    return;
+  }
+
+  $file = \Drupal::service('extension.list.module')->getPath('webapi') . '/config/optional/user.role.api_admin.yml';
+  $values = Yaml::decode(file_get_contents($file));
+  $permissions = \Drupal::service('user.permissions')->getPermissions();
+  if (array_diff($values['permissions'], array_keys($permissions))) {
+    return;
+  }
+  $storage->createFromStorageRecord($values)->save();
 }
 
 /**
@@ -109,4 +134,11 @@ function webapi_update_11001(): void {
  */
 function webapi_update_11002(): void {
   webapi_add_api_docs_path_alias();
+}
+
+/**
+ * Adds the API administrator role that earlier installs never had.
+ */
+function webapi_update_11003(): void {
+  webapi_add_api_admin_role();
 }

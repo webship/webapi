@@ -28,6 +28,13 @@ in `settings.php` and run `drush simple-oauth:generate-keys private://simple_oau
 the status report says "OAuth 2.0 keys: Not available" until a readable key pair
 is configured.
 
+## API administrator role
+
+The module ships the `api_admin` role, "API administrator", in
+`config/optional`. It can read the API documentation and the OpenAPI
+document, and change the Web API settings. Install and update add it when the
+site has no role of that name.
+
 ## Settings
 
 `/admin/config/services/webapi` decides whether the **View JSON** and **View
